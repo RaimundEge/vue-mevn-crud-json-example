@@ -1,0 +1,8 @@
+{
+  "name": "opus",
+  "template": "Default",
+  "isConfigured": {
+    "client": false,
+    "server": false
+  }
+}
