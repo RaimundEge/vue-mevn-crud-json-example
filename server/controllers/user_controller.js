@@ -1,6 +1,7 @@
 'use strict';
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const saltRounds = process.env.BCRYPT_ROUNDS;
+const secret = process.env.JWT_SECRET;
 const jwt = require('jsonwebtoken');
 const User = require('../models/user_schema');
 
@@ -48,7 +49,7 @@ const login = (req, res) => {
             console.log(data);
             var result = {
               user: user,
-              token: jwt.sign(JSON.stringify(user), 'secret')
+              token: jwt.sign(JSON.stringify(user), secret)
             };
             res.status(200).json(result);
           } else {
@@ -66,26 +67,14 @@ const login = (req, res) => {
 };
 
 const readUsers = (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
-    jwt.verify(token, 'secret', (err, user) => {
-      if (err) {
-        res.sendStatus(403);
-      }
-      console.log("token contains: ", user);
-      User.find()
-      .then(data => {
-        res.status(200).json(data);
-      })
+  User.find()
+    .then(data => {
+      res.status(200).json(data);
     })
-  } else {
-    res.sendStatus(401);
-  }
 }
 
-const updateData = async (req, res) => { 
-  if (req.body.password.substring(0,4) == "NEW:") {
+const updateData = async (req, res) => {
+  if (req.body.password.substring(0, 4) == "NEW:") {
     console.log(req.body.password.substring(4));
     req.body.password = await bcrypt.hash(req.body.password.substring(4), saltRounds);
   }
